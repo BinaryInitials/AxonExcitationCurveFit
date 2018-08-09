@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+
 public class Methods {
 	
 	public static final int MIN_PW = 10; 
@@ -46,4 +49,67 @@ public class Methods {
 		}
 		return null;
 	}
+	
+	public static OffSet convertToOffSetFromText(String text){
+		for(OffSet offset : OffSet.values())
+			if(offset.toString().equals(text))
+				return offset;
+		return null;
+	}
+	
+	public static NeuronType convertToNeuronTypeFromText(String text){
+		for(NeuronType nt : NeuronType.values())
+			if(nt.toString().equals(text))
+				return nt;
+		return null;
+	}
+	
+	public static Parameter convertToParameterTypeFromText(String text){
+		for(Parameter p : Parameter.values())
+			if(p.toString().equals(text))
+				return p;
+		return null;
+	}
+	
+	public static DiameterParameter convertToDiameterParameterTypeFromText(String text){
+		for(DiameterParameter p : DiameterParameter.values())
+			if(p.toString().equals(text))
+				return p;
+		return null;
+	}
+
+	public static PulseWidthParameter convertToPulseWidthParameterTypeFromText(String text){
+		for(PulseWidthParameter p : PulseWidthParameter.values())
+			if(p.toString().equals(text))
+				return p;
+		return null;
+	}
+	
+	public static String printCellValue(Cell cell) {
+	    String result = "";
+		switch (cell.getCellTypeEnum()) {
+	        case BOOLEAN:
+	            result = "" + cell.getBooleanCellValue();
+	            break;
+	        case STRING:
+	            result = cell.getRichStringCellValue().getString();
+	            break;
+	        case NUMERIC:
+	            if (DateUtil.isCellDateFormatted(cell)) {
+	                result = "" + cell.getDateCellValue();
+	            } else {
+	                result = "" + cell.getNumericCellValue();
+	            }
+	            break;
+	        case FORMULA:
+	            result = "" + cell.getCellFormula();
+	            break;
+	        case BLANK:
+	            result = "\t";
+	            break;
+	        default:
+	    }
+		return result + "\t";
+	}
+
 }

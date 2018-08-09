@@ -14,10 +14,8 @@ import edu.cwru.oxi1.common.Parameter;
 import edu.cwru.oxi1.common.SimpleMathFunctions;
 
 
-public class Part3ParameterOptimizationPulsewidth {
+public class TestPart3ParameterOptimizationPulsewidth {
 
-	public static final String FILE_NAME = "ModelResult.txt";
-	
 	public static void main(String[] args) throws IOException {
 		HashMap<NeuronType, HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>> data = new HashMap<NeuronType, HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>>();
 		//Initializing data
@@ -55,48 +53,48 @@ public class Part3ParameterOptimizationPulsewidth {
 		 * Parameter optimization
 		 * For this, we are going to optimize the variables to P0*exp(-tau*PW)+Pinf
 		 */
-		String header = "NEURON\tOFFSET\tPARAM\tDPARAM\tTAU\tP0\tPinf\tRES";
-		List<String> lines = new ArrayList<String>();
-		lines.add(header);
-		for(NeuronType nt : NeuronType.values()){
-			for(OffSet offSet : OffSet.values()){
-				for(Parameter param : Parameter.values()){
-					for(DiameterParameter diamp : DiameterParameter.values()){
-						List<Double> x = new ArrayList<Double>();
-						List<Double> y = new ArrayList<Double>();
-						for(int i=0;i<data.get(nt).get(offSet).get(param).get(diamp).size();i++){
-							x.add((i+1)*10.0);
-							y.add(data.get(nt).get(offSet).get(param).get(diamp).get(i));
-						}
-						
-						//Initialization of parameters:
-						double Pinf = SimpleMathFunctions.average(y.subList(y.size()-10, y.size()));
-						double ratio = (y.get(5)-Pinf)/(y.get(10)-Pinf);
-						double tau = ratio < 0.0 ? 0.00001 : Math.log(ratio)/(x.get(5)-x.get(10));
-						
-						double maxTau = 1000*tau;
-						double minTau = 0.001*tau;
-						List<Double> coefs = new ArrayList<Double>();
-						while(Math.abs(maxTau-minTau) > 0.00000001){
-							List<Double> coefsMax = getCoefs(x, y, maxTau);
-							List<Double> coefsMin = getCoefs(x, y, minTau);
-							double varianceMax = coefsMax.get(coefsMax.size()-1);
-							double varianceMin = coefsMin.get(coefsMin.size()-1);
-							if(varianceMax < varianceMin){
-								minTau = (maxTau + minTau)/2.0;
-								coefs = coefsMax;
-							}else{
-								maxTau = (maxTau + minTau)/2.0;
-								coefs = coefsMin;
-							}
-						}
-						lines.add(nt + "\t" + offSet + "\t" + param + "\t" + diamp + "\t" + (maxTau+minTau)/2.0 + "\t" + coefs.toString().replaceAll("\\[|\\]","").replaceAll(", ","\t"));
-					}
-				}
+		
+		System.out.println("NEURON\tOFFSET\tPARMA\tPWPARAM\tTAU\tP0\tPinf\tRES");
+		NeuronType nt = NeuronType.MOTOR;
+		OffSet offSet = OffSet.ZERO;
+		Parameter param = Parameter.MU;
+		DiameterParameter pwp = DiameterParameter.B;
+		List<Double> x = new ArrayList<Double>();
+		List<Double> y = new ArrayList<Double>();
+		for(int i=0;i<data.get(nt).get(offSet).get(param).get(pwp).size();i++){
+			x.add((i+1)*10.0);
+			y.add(data.get(nt).get(offSet).get(param).get(pwp).get(i));
+		}
+		
+		//Initialization of parameters:
+		double Pinf = SimpleMathFunctions.average(y.subList(y.size()-10, y.size()));
+		System.out.println(y.get(5) + "\t" + Pinf + "\t" + y.get(10) + "\t" + x.get(5) + "\t" + x.get(10));
+		System.out.println((y.get(5)-Pinf)/(y.get(10)-Pinf));
+		double tau = Math.log((y.get(5)-Pinf)/(y.get(10)-Pinf))/(x.get(5)-x.get(10));
+		tau = (y.get(5)-Pinf)/(y.get(10)-Pinf) < 0.0 ? 0.000001 : tau;
+		
+		System.out.println("Initial parameters: ");
+		System.out.println(Pinf + "\t" + tau);
+		
+		double maxTau = 1000*tau;
+		double minTau = 0.001*tau;
+		List<Double> coefs = new ArrayList<Double>();
+		while(Math.abs(maxTau-minTau) > 0.00000001){
+			List<Double> coefsMax = getCoefs(x, y, maxTau);
+			List<Double> coefsMin = getCoefs(x, y, minTau);
+			double varianceMax = coefsMax.get(coefsMax.size()-1);
+			double varianceMin = coefsMin.get(coefsMin.size()-1);
+			if(varianceMax < varianceMin){
+				minTau = (maxTau + minTau)/2.0;
+				coefs = coefsMax;
+			}else{
+				maxTau = (maxTau + minTau)/2.0;
+				coefs = coefsMin;
 			}
 		}
-		Methods.writeToFile(FILE_NAME, lines);
+		System.out.println(nt + "\t" + offSet + "\t" + param + "\t" + pwp + "\t" + (maxTau+minTau)/2.0 + "\t" + coefs.toString().replaceAll("\\[|\\]","").replaceAll(", ","\t"));
 	}
+		
 	
 	
 	public static List<Double> getCoefs(List<Double> x, List<Double> y, double tau){

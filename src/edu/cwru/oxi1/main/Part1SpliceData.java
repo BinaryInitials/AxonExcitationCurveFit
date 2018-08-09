@@ -8,9 +8,7 @@ import java.util.List;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -43,8 +41,8 @@ public class Part1SpliceData {
 			        rowIndex++;
 			        while(sheet.getRow(rowIndex) != null && sheet.getRow(rowIndex).getCell(colIndex) != null){
 			        	String line = (offset + "\t" + diameter + "\t");
-			        	for(int i=0;i<5;i++)
-			        		line += (printCellValue(sheet.getRow(rowIndex).getCell(colIndex+i)));
+			        	for(int i=0;i<6;i++)
+			        		line += (Methods.printCellValue(sheet.getRow(rowIndex).getCell(colIndex+i)));
 			        	lines.add(line);
 			        	rowIndex++;
 			        }
@@ -62,33 +60,4 @@ public class Part1SpliceData {
 		}
 		System.out.println("Done.");
 	}
-	
-	
-	private static String printCellValue(Cell cell) {
-	    String result = "";
-		switch (cell.getCellTypeEnum()) {
-	        case BOOLEAN:
-	            result = "" + cell.getBooleanCellValue();
-	            break;
-	        case STRING:
-	            result = cell.getRichStringCellValue().getString();
-	            break;
-	        case NUMERIC:
-	            if (DateUtil.isCellDateFormatted(cell)) {
-	                result = "" + cell.getDateCellValue();
-	            } else {
-	                result = "" + cell.getNumericCellValue();
-	            }
-	            break;
-	        case FORMULA:
-	            result = "" + cell.getCellFormula();
-	            break;
-	        case BLANK:
-	            result = "\t";
-	            break;
-	        default:
-	    }
-		return result + "\t";
-	}
-
 }

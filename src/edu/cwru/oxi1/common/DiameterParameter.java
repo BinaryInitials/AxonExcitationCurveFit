@@ -1,6 +1,6 @@
 package edu.cwru.oxi1.common;
 
-public enum PWParameter {
+public enum DiameterParameter {
 	A,
 	B,
 	C,
