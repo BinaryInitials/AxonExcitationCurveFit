@@ -142,7 +142,7 @@ public class Part4ModelValidationResiduals {
 			residuals += Math.pow((d2VeHat - d2Ve.get(i)), 2.0);
 		}
 		
-		return residuals;
+		return Math.sqrt(residuals/Ve.size());
 	}
 
 }
