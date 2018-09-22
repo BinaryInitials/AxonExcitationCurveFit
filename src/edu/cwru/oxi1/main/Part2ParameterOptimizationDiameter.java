@@ -18,8 +18,10 @@ import edu.cwru.oxi1.common.Parameter;
 public class Part2ParameterOptimizationDiameter {
 
 	public static final String FILE_NAME = "CubicFit.txt";
+	public static final int CUBIC_POLYNOMIAL_DEGREE = 3;
 	
 	public static void main(String[] args) throws IOException {
+		System.out.println("Running...");
 		for(NeuronType neuronType : NeuronType.values()){
 			//Initializing hacky "database"
 			HashMap<OffSet, HashMap<Integer, HashMap<Parameter, List<Double>>>> data = new HashMap<OffSet, HashMap<Integer, HashMap<Parameter, List<Double>>>>();
@@ -72,7 +74,7 @@ public class Part2ParameterOptimizationDiameter {
 							//Values of parameters, mV for alpha, beta and us for mu and nu
 							y.add(Math.log(sign*dataOffSet.get(pulsewidth).get(parameter).get(i)));
 						}
-						List<Double> coefs = getCoefs(x,y,3);
+						List<Double> coefs = getCoefs(x, y, CUBIC_POLYNOMIAL_DEGREE);
 						output.add(offSet.getValue() + "\t" + pulsewidth + "\t" + coefs.toString().replaceAll("\\[|\\]","").replaceAll(", ","\t"));
 					}
 					Methods.writeToFile(neuronType.toString() + "_" + parameter.toString() + "_" + FILE_NAME, output);

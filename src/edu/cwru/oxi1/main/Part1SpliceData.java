@@ -29,7 +29,6 @@ public class Part1SpliceData {
 		        
 		        DataFormatter dataFormatter = new DataFormatter();
 
-		        
 				List<String> lines = new ArrayList<String>();
 				String header = "OFFSET\tdiameter\tPW\tALPHA\tMU\tBETA\tNU\tRES";
 				lines.add(header);
@@ -39,6 +38,7 @@ public class Part1SpliceData {
 			        double offset = Double.valueOf(info.replaceAll("^o(.*)d.*$", "$1"));
 			        int diameter = Integer.valueOf(info.replaceAll("^o.*d([0-9]+)$", "$1"));
 			        rowIndex++;
+			        
 			        while(sheet.getRow(rowIndex) != null && sheet.getRow(rowIndex).getCell(colIndex) != null){
 			        	String line = (offset + "\t" + diameter + "\t");
 			        	for(int i=0;i<6;i++)

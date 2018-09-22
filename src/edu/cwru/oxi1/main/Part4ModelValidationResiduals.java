@@ -71,14 +71,16 @@ public class Part4ModelValidationResiduals {
 
 		//Storing raw values;
 //		HashMap<NeuronType, HashMap<OffSet, HashMap<Integer, HashMap<Integer, HashMap<String, List<Double>>>>>> rawData = new HashMap<NeuronType, HashMap<OffSet, HashMap<Integer, HashMap<Integer, HashMap<String, List<Double>>>>>>();
-		NeuronType nt = NeuronType.MOTOR;
+		NeuronType nt = NeuronType.SENSORY;
 		String offSet = "0";
-		for(int diameter = 2; diameter<=20;diameter++){
-			for(int pulsewidth = 10; pulsewidth<=500; pulsewidth+=10){
-				List<Double> Ves = new ArrayList<Double>();
-		        List<Double> d2Ves = new ArrayList<Double>();
-				try {
-					Workbook workbook = WorkbookFactory.create(new File("raw/" + nt.getFileName()));
+		try {
+			Workbook workbook = WorkbookFactory.create(new File("raw/" + nt.getFileName()));
+			for(int diameter = 2; diameter<=20;diameter++){
+				for(int pulsewidth = 10; pulsewidth<=500; pulsewidth+=10){
+					List<Double> Ves = new ArrayList<Double>();
+			        List<Double> d2Ves = new ArrayList<Double>();
+
+					
 					
 					int columnVe = pulsewidth/10*3-3;
 					int columnd2Ve = pulsewidth/10*3-2;
@@ -90,20 +92,19 @@ public class Part4ModelValidationResiduals {
 		        		d2Ves.add(Double.valueOf(Methods.printCellValue(sheet.getRow(rowIndex).getCell(columnd2Ve))));
 			        	rowIndex++;
 			        }
-				} catch (EncryptedDocumentException e) {
-					e.printStackTrace();
-				} catch (InvalidFormatException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 
 
 				//Validation
 				double residual = validation(data, nt, OffSet.ZERO, Integer.valueOf(diameter), pulsewidth, Ves, d2Ves);
 				System.out.println(OffSet.ZERO + "\t" + diameter + "\t" + pulsewidth + "\t" + residual);
-				
+				}
 			}
+		} catch (EncryptedDocumentException e) {
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
