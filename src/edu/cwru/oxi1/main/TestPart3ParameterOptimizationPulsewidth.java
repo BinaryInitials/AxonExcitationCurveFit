@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import Jama.Matrix;
-import edu.cwru.oxi1.common.Methods;
-import edu.cwru.oxi1.common.NeuronType;
-import edu.cwru.oxi1.common.OffSet;
 import edu.cwru.oxi1.common.DiameterParameter;
+import edu.cwru.oxi1.common.Methods;
+import edu.cwru.oxi1.common.OffSet;
 import edu.cwru.oxi1.common.Parameter;
 import edu.cwru.oxi1.common.SimpleMathFunctions;
 
@@ -17,35 +16,29 @@ import edu.cwru.oxi1.common.SimpleMathFunctions;
 public class TestPart3ParameterOptimizationPulsewidth {
 
 	public static void main(String[] args) throws IOException {
-		HashMap<NeuronType, HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>> data = new HashMap<NeuronType, HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>>();
 		//Initializing data
-		for(NeuronType nt : NeuronType.values()){
-			HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>> dataOneType = new HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>();
-			for(OffSet offSet : OffSet.values()){
-				HashMap<Parameter, HashMap<DiameterParameter, List<Double>>> parameterColumn = new HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>();
-				for(Parameter parameter : Parameter.values()){
-					HashMap<DiameterParameter, List<Double>> column = new HashMap<DiameterParameter, List<Double>>();
-					for(DiameterParameter param : DiameterParameter.values())
-						column.put(param, new ArrayList<Double>());
-					parameterColumn.put(parameter, column);
-				}
-				dataOneType.put(offSet, parameterColumn);
+		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>> data = new HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>();
+		for(OffSet offSet : OffSet.values()){
+			HashMap<Parameter, HashMap<DiameterParameter, List<Double>>> parameterColumn = new HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>();
+			for(Parameter parameter : Parameter.values()){
+				HashMap<DiameterParameter, List<Double>> column = new HashMap<DiameterParameter, List<Double>>();
+				for(DiameterParameter param : DiameterParameter.values())
+					column.put(param, new ArrayList<Double>());
+				parameterColumn.put(parameter, column);
 			}
-			data.put(nt, dataOneType);
+			data.put(offSet, parameterColumn);
 		}
 		
 		//Reading file and populating "database"
-		for(NeuronType nt : NeuronType.values()){
-			for(Parameter parameter : Parameter.values()){
-				String fileName = nt + "_" + parameter + "_" + Part2ParameterOptimizationDiameter.FILE_NAME;
-				List<String[]> input = Methods.readFile(fileName,true);
-				for(String[] columns : input){
-					OffSet offSet = Methods.convertToOffSet(columns[0]);
-					data.get(nt).get(offSet).get(parameter).get(DiameterParameter.D).add(Double.valueOf(columns[2]));
-					data.get(nt).get(offSet).get(parameter).get(DiameterParameter.C).add(Double.valueOf(columns[3]));
-					data.get(nt).get(offSet).get(parameter).get(DiameterParameter.B).add(Double.valueOf(columns[4]));
-					data.get(nt).get(offSet).get(parameter).get(DiameterParameter.A).add(Double.valueOf(columns[5]));
-				}
+		for(Parameter parameter : Parameter.values()){
+			String fileName = parameter + "_" + Part2ParameterOptimizationDiameter.FILE_NAME;
+			List<String[]> input = Methods.readFile(fileName,true);
+			for(String[] columns : input){
+				OffSet offSet = Methods.convertToOffSet(columns[0]);
+				data.get(offSet).get(parameter).get(DiameterParameter.D).add(Double.valueOf(columns[2]));
+				data.get(offSet).get(parameter).get(DiameterParameter.C).add(Double.valueOf(columns[3]));
+				data.get(offSet).get(parameter).get(DiameterParameter.B).add(Double.valueOf(columns[4]));
+				data.get(offSet).get(parameter).get(DiameterParameter.A).add(Double.valueOf(columns[5]));
 			}
 		}
 		
@@ -54,16 +47,15 @@ public class TestPart3ParameterOptimizationPulsewidth {
 		 * For this, we are going to optimize the variables to P0*exp(-tau*PW)+Pinf
 		 */
 		
-		System.out.println("NEURON\tOFFSET\tPARMA\tPWPARAM\tTAU\tP0\tPinf\tRES");
-		NeuronType nt = NeuronType.MOTOR;
+		System.out.println("OFFSET\tPARMA\tPWPARAM\tTAU\tP0\tPinf\tRES");
 		OffSet offSet = OffSet.ZERO;
 		Parameter param = Parameter.MU;
 		DiameterParameter pwp = DiameterParameter.B;
 		List<Double> x = new ArrayList<Double>();
 		List<Double> y = new ArrayList<Double>();
-		for(int i=0;i<data.get(nt).get(offSet).get(param).get(pwp).size();i++){
+		for(int i=0;i<data.get(offSet).get(param).get(pwp).size();i++){
 			x.add((i+1)*10.0);
-			y.add(data.get(nt).get(offSet).get(param).get(pwp).get(i));
+			y.add(data.get(offSet).get(param).get(pwp).get(i));
 		}
 		
 		//Initialization of parameters:
@@ -92,7 +84,7 @@ public class TestPart3ParameterOptimizationPulsewidth {
 				coefs = coefsMin;
 			}
 		}
-		System.out.println(nt + "\t" + offSet + "\t" + param + "\t" + pwp + "\t" + (maxTau+minTau)/2.0 + "\t" + coefs.toString().replaceAll("\\[|\\]","").replaceAll(", ","\t"));
+		System.out.println(offSet + "\t" + param + "\t" + pwp + "\t" + (maxTau+minTau)/2.0 + "\t" + coefs.toString().replaceAll("\\[|\\]","").replaceAll(", ","\t"));
 	}
 		
 	

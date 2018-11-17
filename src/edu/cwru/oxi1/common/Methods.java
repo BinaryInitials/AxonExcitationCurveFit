@@ -57,13 +57,6 @@ public class Methods {
 		return null;
 	}
 	
-	public static NeuronType convertToNeuronTypeFromText(String text){
-		for(NeuronType nt : NeuronType.values())
-			if(nt.toString().equals(text))
-				return nt;
-		return null;
-	}
-	
 	public static Parameter convertToParameterTypeFromText(String text){
 		for(Parameter p : Parameter.values())
 			if(p.toString().equals(text))

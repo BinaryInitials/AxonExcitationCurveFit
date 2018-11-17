@@ -11,22 +11,33 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
 import edu.cwru.oxi1.common.Methods;
-import edu.cwru.oxi1.common.NeuronType;
 
 public class Part0ConvertToText {
 
+	
+	public static final String RAW_DATA_TXT = "OffSetDiameterPulseWidthVeD2Ve.txt";
+	
 	public static void main(String[] args) {
+			
+			String inputFileName = "";
+			if(args != null && args.length > 0){
+				inputFileName = args[0];
+				if(!inputFileName.endsWith("xlsx")){
+					System.out.println("Invalid input file. Expecting excel filetype");
+					System.exit(-1);
+				}
+			}else {
+				inputFileName = "raw/Sensory.xlsx";
+			}
+		
 			String offSet = "0";
-			NeuronType neuronType = NeuronType.SENSORY;
 			Date tic = new Date();
-			String fileName = neuronType + "_OffSetDiameterPulseWidthVeD2Ve.txt";
 			List<String> lines = new ArrayList<String>();
 			try {
-				Workbook workbook = WorkbookFactory.create(new File("raw/" + neuronType.getFileName()));
+				Workbook workbook = WorkbookFactory.create(new File(inputFileName));
 
-				System.out.println("CONVERT TO TEXT: RAW DATA");
+				System.out.println("Converting Spreadsheets to text...");
 				for(int diameter = 2; diameter<=20;diameter++){
 					for(int pulsewidth = 10; pulsewidth<=500; pulsewidth+=10){
 						List<Double> Ves = new ArrayList<Double>();
@@ -56,7 +67,7 @@ public class Part0ConvertToText {
 			}
 				
 			try {
-				Methods.writeToFile(fileName, lines);
+				Methods.writeToFile(RAW_DATA_TXT, lines);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

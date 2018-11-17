@@ -14,7 +14,7 @@ public class TestParameterOptimization {
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		//1. Capture data from file 
-		BufferedReader buffer = new BufferedReader(new FileReader(new File("raw/data2.txt")));
+		BufferedReader buffer = new BufferedReader(new FileReader(new File(Part0ConvertToText.RAW_DATA_TXT)));
 		
 		List<Double> Ve = new ArrayList<Double>();
 		List<Double> d2Ve = new ArrayList<Double>();
