@@ -6,38 +6,28 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import Jama.Matrix;
 import edu.cwru.oxi1.common.DiameterParameter;
+import edu.cwru.oxi1.common.MathMethods;
 import edu.cwru.oxi1.common.Methods;
 import edu.cwru.oxi1.common.OffSet;
 import edu.cwru.oxi1.common.Parameter;
 import edu.cwru.oxi1.common.SimpleMathFunctions;
 
 
-public class Part3ParameterOptimizationPulsewidth {
+public class Part2_ParameterOptimizationPulsewidth {
 
-	public static final String FILE_NAME = "ModelResult.txt";
+	public static final String FILE_NAME = "Part2_ModelResult.txt";
 	
 	public static void main(String[] args) throws IOException {
 		Date tic = new Date();
 		System.out.println("Calculating Ae^(-PW/Tau) fit for Pulsewidth...");
 		
 		//Initializing data
-		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>> data = new HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>();
-		for(OffSet offSet : OffSet.values()){
-			HashMap<Parameter, HashMap<DiameterParameter, List<Double>>> parameterColumn = new HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>();
-			for(Parameter parameter : Parameter.values()){
-				HashMap<DiameterParameter, List<Double>> column = new HashMap<DiameterParameter, List<Double>>();
-				for(DiameterParameter param : DiameterParameter.values())
-					column.put(param, new ArrayList<Double>());
-				parameterColumn.put(parameter, column);
-			}
-			data.put(offSet, parameterColumn);
-		}
+		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>> data = initializeMap();
 		
 		//Reading file and populating "database"
 		for(Parameter parameter : Parameter.values()){
-			String fileName = parameter + "_" + Part2ParameterOptimizationDiameter.FILE_NAME;
+			String fileName = "Part1_" + parameter + "_" + Part1_ParameterOptimizationDiameter.FILE_NAME;
 			List<String[]> input = Methods.readFile(fileName,true);
 			for(String[] columns : input){
 				OffSet offSet = Methods.convertToOffSet(columns[0]);
@@ -70,12 +60,12 @@ public class Part3ParameterOptimizationPulsewidth {
 					double ratio = (y.get(5)-Pinf)/(y.get(10)-Pinf);
 					double tau = ratio < 0.0 ? 0.00001 : Math.log(ratio)/(x.get(5)-x.get(10));
 					
-					double maxTau = 1000*tau;
+					double maxTau = 500*tau;
 					double minTau = 0.001*tau;
 					List<Double> coefs = new ArrayList<Double>();
 					while(Math.abs(maxTau-minTau) > 0.00000001){
-						List<Double> coefsMax = getCoefs(x, y, maxTau);
-						List<Double> coefsMin = getCoefs(x, y, minTau);
+						List<Double> coefsMax = MathMethods.getCoefs(x, y, maxTau);
+						List<Double> coefsMin = MathMethods.getCoefs(x, y, minTau);
 						double varianceMax = coefsMax.get(coefsMax.size()-1);
 						double varianceMin = coefsMin.get(coefsMin.size()-1);
 						if(varianceMax < varianceMin){
@@ -98,31 +88,18 @@ public class Part3ParameterOptimizationPulsewidth {
 	}
 	
 	
-	public static List<Double> getCoefs(List<Double> x, List<Double> y, double tau){
-		//Creating Vondermonde matrix
-		double[][] xMatrix = new double[x.size()][2];
-		double[] yMatrix = new double[y.size()];
-		
-		for(int i=0;i<y.size();i++)
-			yMatrix[i] = y.get(i);
-
-		//Creating a Vandermonde Matrix
-		for(int row = 0;row<x.size(); row++){
-			xMatrix[row][0] = Math.exp(tau*x.get(row));
-			xMatrix[row][1] = 1.0;
+	private static HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>> initializeMap() {
+		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>> data = new HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>>();
+		for(OffSet offSet : OffSet.values()){
+			HashMap<Parameter, HashMap<DiameterParameter, List<Double>>> parameterColumn = new HashMap<Parameter, HashMap<DiameterParameter, List<Double>>>();
+			for(Parameter parameter : Parameter.values()){
+				HashMap<DiameterParameter, List<Double>> column = new HashMap<DiameterParameter, List<Double>>();
+				for(DiameterParameter param : DiameterParameter.values())
+					column.put(param, new ArrayList<Double>());
+				parameterColumn.put(parameter, column);
+			}
+			data.put(offSet, parameterColumn);
 		}
-		
-		List<Double> coefficients = new ArrayList<Double>();
-		Matrix a = new Matrix(xMatrix);
-		Matrix b = new Matrix(yMatrix, y.size());
-		Matrix c = (a.transpose().times(a)).inverse().times(a.transpose()).times(b);
-		double[][] coef = c.getArray();
-		for(double[] coefOne : coef)
-			coefficients.add(coefOne[0]);
-		double variance = 0.0;
-		for(int i=0;i<y.size();i++)
-			variance += Math.pow(coefficients.get(0)*Math.exp(x.get(i)*tau) + coefficients.get(1)- y.get(i), 2.0);
-		coefficients.add(variance);
-		return coefficients;
+		return data;
 	}
 }

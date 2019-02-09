@@ -18,28 +18,26 @@ import edu.cwru.oxi1.common.OffSet;
 import edu.cwru.oxi1.common.Parameter;
 import edu.cwru.oxi1.common.PulseWidthParameter;
 
-public class Part4ModelValidationResiduals {
+public class Part3_ModelValidationResiduals {
 
 	public static void main(String[] args) throws IOException {
 		
-		//Initializing data
-		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>> data = new HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>>();
-		for(OffSet offSet : OffSet.values()){
-			HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>> parameterColumn = new HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>();
-			for(Parameter parameter : Parameter.values()){
-				HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>> diameterColumn = new HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>();
-				for(DiameterParameter diameter: DiameterParameter.values()){
-					HashMap<PulseWidthParameter, Double> pulseWidthColumn = new HashMap<PulseWidthParameter, Double>();
-					for(PulseWidthParameter pulseWidth : PulseWidthParameter.values())
-						pulseWidthColumn.put(pulseWidth, 0.0);
-					diameterColumn.put(diameter, pulseWidthColumn);
-				}
-				parameterColumn.put(parameter, diameterColumn);
+		String inputFileName = "";
+		if(args != null && args.length > 0){
+			inputFileName = args[0];
+			if(!inputFileName.endsWith("xlsx")){
+				System.out.println("Invalid input file. Expecting excel filetype");
+				System.exit(-1);
 			}
-			data.put(offSet, parameterColumn);
+		}else {
+			inputFileName = "raw/Sensory.xlsx";
 		}
 		
-		List<String[]> model = Methods.readFile(Part3ParameterOptimizationPulsewidth.FILE_NAME, true);
+		
+		//Initializing data
+		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>> data = initializeMap();
+		
+		List<String[]> model = Methods.readFile(Part2_ParameterOptimizationPulsewidth.FILE_NAME, true);
 		for(String[] line : model){
 			OffSet offSet = Methods.convertToOffSetFromText(line[0]);
 			Parameter param = Methods.convertToParameterTypeFromText(line[1]);
@@ -53,7 +51,7 @@ public class Part4ModelValidationResiduals {
 //		HashMap<OffSet, HashMap<Integer, HashMap<Integer, HashMap<String, List<Double>>>>> rawData = new HashMap<OffSet, HashMap<Integer, HashMap<Integer, HashMap<String, List<Double>>>>>();
 		String offSet = "0";
 		try {
-			Workbook workbook = WorkbookFactory.create(new File("raw/Sensory.xlsx"));
+			Workbook workbook = WorkbookFactory.create(new File(inputFileName));
 			for(int diameter = 2; diameter<=20;diameter++){
 				for(int pulsewidth = 10; pulsewidth<=500; pulsewidth+=10){
 					List<Double> Ves = new ArrayList<Double>();
@@ -87,6 +85,25 @@ public class Part4ModelValidationResiduals {
 		}
 	}
 	
+	private static HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>> initializeMap() {
+		HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>> data = new HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>>();
+		for(OffSet offSet : OffSet.values()){
+			HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>> parameterColumn = new HashMap<Parameter, HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>>();
+			for(Parameter parameter : Parameter.values()){
+				HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>> diameterColumn = new HashMap<DiameterParameter, HashMap<PulseWidthParameter, Double>>();
+				for(DiameterParameter diameter: DiameterParameter.values()){
+					HashMap<PulseWidthParameter, Double> pulseWidthColumn = new HashMap<PulseWidthParameter, Double>();
+					for(PulseWidthParameter pulseWidth : PulseWidthParameter.values())
+						pulseWidthColumn.put(pulseWidth, 0.0);
+					diameterColumn.put(diameter, pulseWidthColumn);
+				}
+				parameterColumn.put(parameter, diameterColumn);
+			}
+			data.put(offSet, parameterColumn);
+		}
+		return data;
+	}
+
 	public static double validation(HashMap<OffSet, HashMap<Parameter, HashMap<DiameterParameter,HashMap<PulseWidthParameter, Double>>>> model, OffSet os, int diameter, int pulsewidth, List<Double> Ve, List<Double> d2Ve){
 		double alphaA = model.get(os).get(Parameter.ALPHA).get(DiameterParameter.A).get(PulseWidthParameter.P0) * Math.exp(pulsewidth * model.get(os).get(Parameter.ALPHA).get(DiameterParameter.A).get(PulseWidthParameter.Tau)) + model.get(os).get(Parameter.ALPHA).get(DiameterParameter.A).get(PulseWidthParameter.Pinf);
 		double alphaB = model.get(os).get(Parameter.ALPHA).get(DiameterParameter.B).get(PulseWidthParameter.P0) * Math.exp(pulsewidth * model.get(os).get(Parameter.ALPHA).get(DiameterParameter.B).get(PulseWidthParameter.Tau)) + model.get(os).get(Parameter.ALPHA).get(DiameterParameter.B).get(PulseWidthParameter.Pinf);

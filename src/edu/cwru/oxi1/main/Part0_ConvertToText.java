@@ -13,7 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import edu.cwru.oxi1.common.Methods;
 
-public class Part0ConvertToText {
+public class Part0_ConvertToText {
 
 	
 	public static final String RAW_DATA_TXT = "OffSetDiameterPulseWidthVeD2Ve.txt";
